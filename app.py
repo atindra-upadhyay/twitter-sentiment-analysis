@@ -288,6 +288,10 @@ def render_result(prediction: int, confidence: float, probabilities, cleaned: st
         st.code(cleaned, language=None)
 
 
+def update_tweet_input(text: str):
+    st.session_state.tweet_input = text
+
+
 st.set_page_config(
     page_title="TweetSense — ML Classifier",
     page_icon="🐦",
@@ -314,9 +318,13 @@ with st.sidebar:
     st.divider()
     st.markdown("**Try a sample**")
     for i, sample in enumerate(SAMPLE_TWEETS):
-        if st.button(sample, key=f"sample_{i}", use_container_width=True):
-            st.session_state.tweet_input = sample
-            st.rerun()
+        st.button(
+            sample,
+            key=f"sample_{i}",
+            use_container_width=True,
+            on_click=update_tweet_input,
+            args=(sample,),
+        )
 
 vectorizer = load_vectorizer(vectorizer_cache_key())
 
@@ -356,9 +364,12 @@ col1, col2 = st.columns([3, 1])
 with col1:
     predict_clicked = st.button("✨ Analyze Tweet", type="primary", use_container_width=True)
 with col2:
-    if st.button("Clear", use_container_width=True):
-        st.session_state.tweet_input = ""
-        st.rerun()
+    st.button(
+        "Clear",
+        use_container_width=True,
+        on_click=update_tweet_input,
+        args=("",),
+    )
 
 if predict_clicked:
     if not user_text.strip():
